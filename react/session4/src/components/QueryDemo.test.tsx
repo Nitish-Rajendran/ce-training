@@ -1,39 +1,41 @@
-import { render, screen } from '../test/test-utils'
-import ThemedCard from './ThemedCard'
+import { render, screen } from "../test/test-utils";
+import ThemedCard from "./ThemedCard";
 
-// getBy throws an error if the element is not found.
-test('getByText throws when element is missing', () => {
-  render(<ThemedCard name="Rahul" score={92} />)
+// getBy is used when exactly one matching element should exist.
+// getAllBy is used when multiple matching elements are expected.
+// getAllByRole returns an array of elements, whereas getByRole
+// returns a single element and throws an error if none or more than one match is found.
+
+// getBy — throws if element is not found
+test("getByText throws when element is missing", () => {
+  render(<ThemedCard name="Rahul" score={92} />);
 
   // This passes because the element exists.
-  expect(screen.getByText('Rahul')).toBeInTheDocument()
+  expect(screen.getByText("Rahul")).toBeInTheDocument();
 
-  // Uncommenting the line below will throw an error.
-  // screen.getByText('Priya')
-})
+  // Uncomment to see the failure.
+  // screen.getByText("Priya");
+});
 
-// queryBy returns null if the element is not found.
-test('queryBy returns null when element is missing', () => {
-  render(<ThemedCard name="Rahul" score={92} />)
+// queryBy — returns null if element is not found
+test("queryBy returns null when element is missing", () => {
+  render(<ThemedCard name="Rahul" score={92} />);
 
-  // Use queryBy when checking that an element is not present.
-  expect(screen.queryByText('Fail')).not.toBeInTheDocument()
-})
+  // Use queryBy when checking that something is NOT rendered.
+  expect(screen.queryByText("Fail")).not.toBeInTheDocument();
+});
 
-//getAllBy — finds multiple  elements
-test('getAllBy finds multiple elements', () => {
+// getAllBy — finds multiple matching elements
+test("getAllBy finds multiple elements", () => {
   render(
     <div>
       <ThemedCard name="Rahul" score={92} />
       <ThemedCard name="Priya" score={78} />
-    </div>
-  )
+    </div>,
+  );
 
-  // Both cards show "Pass".
-  const passLabels = screen.getAllByText('Pass')
-  expect(passLabels).toHaveLength(2)
-})
+  // Both cards display "Pass".
+  const passBadges = screen.getAllByText("Pass");
 
-/* 
-getByRole is used when we expect only 1 element with a given role.
-getAllByRole is used when we expect multiple elements with the same role and want to access all of them. */
+  expect(passBadges).toHaveLength(2);
+});

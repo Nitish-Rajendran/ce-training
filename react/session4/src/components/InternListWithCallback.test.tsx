@@ -1,65 +1,59 @@
-import { render, screen } from '../test/test-utils'
-import { vi } from 'vitest'
-import InternListWithCallback from './InternListWithCallback'
+import { render, screen } from "../test/test-utils";
+import InternListWithCallback from "./InternListWithCallback";
 
-vi.mock('../contexts/intern-context', async () => {
+vi.mock("../contexts/intern-context", async () => {
   const actual = await vi.importActual<
-    typeof import('../contexts/intern-context')
-  >('../contexts/intern-context')
+    typeof import("../contexts/intern-context")
+  >("../contexts/intern-context");
 
   return {
     ...actual,
+
     useInterns: () => ({
       interns: [
         {
           id: 1,
-          name: 'Rahul',
+          name: "Rahul",
           score: 92,
-          role: 'Frontend',
+          role: "Frontend",
           isPresent: true,
         },
         {
           id: 2,
-          name: 'Priya',
+          name: "Priya",
           score: 78,
-          role: 'Backend',
+          role: "Backend",
           isPresent: true,
         },
         {
           id: 3,
-          name: 'Amit',
+          name: "Amit",
           score: 45,
-          role: 'Fullstack',
+          role: "Fullstack",
           isPresent: false,
         },
       ],
-      isLoading: false,
-      addIntern: vi.fn(),
       removeIntern: vi.fn(),
+      addIntern: vi.fn(),
+      isLoading: false,
     }),
-  }
-})
-test('renders all interns from context', () => {
-  render(<InternListWithCallback />)
+  };
+});
 
-  expect(screen.getByText(/Rahul/)).toBeInTheDocument()
-expect(screen.getByText(/Priya/)).toBeInTheDocument()
-expect(screen.getByText(/Amit/)).toBeInTheDocument()
-})
+test("renders all interns from the mocked context", () => {
+  render(<InternListWithCallback />);
 
-test('renders correct number of intern rows', () => {
-  render(<InternListWithCallback />)
+  expect(screen.getByText("Rahul — 92")).toBeInTheDocument();
+  expect(screen.getByText("Priya — 78")).toBeInTheDocument();
+  expect(screen.getByText("Amit — 45")).toBeInTheDocument();
+});
 
-  
-  const removeButtons = screen.getAllByRole('button', {
-    name: 'Remove',
-  })
+test("renders the correct number of Remove buttons", () => {
+  render(<InternListWithCallback />);
 
-  expect(removeButtons).toHaveLength(3)
-})
+  const removeButtons = screen.getAllByRole("button", {
+    name: "Remove",
+  });
 
-/*
-Mock as little as possible. 
-Mock dependencies such as context, APIs, or external services to isolate the component under test. 
-The component's own logic can be run normally to verify its real behavior.
-*/
+  expect(removeButtons).toHaveLength(3);
+});

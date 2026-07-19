@@ -1,188 +1,140 @@
-import { render, screen } from '../test/test-utils'
-import userEvent from '@testing-library/user-event'
-import AddInternForm from './AddInternForm'
-import { vi, describe, beforeEach, test } from 'vitest'
-import { waitFor } from '../test/test-utils'
+import { render, screen, waitFor } from "../test/test-utils";
+import userEvent from "@testing-library/user-event";
+import AddInternForm from "./AddInternForm";
 
-/*
-Keep describe blocks to two levels at most.
-Deeper nesting makes test files harder to read and maintain, and produces long
-failure paths that make it more difficult to locate the actual failing test.
-*/
-const mockAddIntern = vi.fn()
+// userEvent is preferred over fireEvent because it simulates
+// real user interactions such as typing, clicking, focusing,
+// and keyboard events. This makes tests closer to actual user behavior.
 
-vi.mock('../contexts/intern-context', async () => {
-  const actual = await vi.importActual<
-    typeof import('../contexts/intern-context')
-  >('../contexts/intern-context')
+test("updates name when user types", async () => {
+  const user = userEvent.setup();
 
-  return {
-    ...actual,
-    useInterns: () => ({
-      interns: [],
-      isLoading: false,
-      addIntern: mockAddIntern,
-      removeIntern: vi.fn(),
-    }),
-  }
-})
+  render(<AddInternForm onAdd={() => {}} count={0} />);
 
-describe('AddInternForm', () => {
-  let user: ReturnType<typeof userEvent.setup>
+  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
 
-  beforeEach(() => {
-    user = userEvent.setup()
-    mockAddIntern.mockClear()
-  })
+  expect(screen.getByDisplayValue("Rahul")).toBeInTheDocument();
+});
 
+test("updates score when user types", async () => {
+  const user = userEvent.setup();
 
-describe('initial state', () => {
-  test('name input is empty', () => {
-  render(<AddInternForm />)
+  render(<AddInternForm onAdd={() => {}} count={0} />);
 
-  expect(screen.getByPlaceholderText('Name')).toHaveValue('')
-})
+  const scoreInput = screen.getByPlaceholderText("Score");
 
-test('score input starts at 0', () => {
-  render(<AddInternForm />)
+  await user.clear(scoreInput);
+  await user.type(scoreInput, "92");
 
-  expect(screen.getByPlaceholderText('Score')).toHaveValue(0)
-})
+  expect(screen.getByDisplayValue("92")).toBeInTheDocument();
+});
+// expect.objectContaining() checks only the specified properties
+// of an object. It ignores any additional properties, making the
+// test more flexible than comparing the entire object.
 
-test('role defaults to Frontend', () => {
-  render(<AddInternForm />)
+test("resets name input when Reset is clicked", async () => {
+  const user = userEvent.setup();
 
-  expect(screen.getByRole('combobox')).toHaveValue('Frontend')
-})
+  render(<AddInternForm onAdd={() => {}} count={0} />);
 
-})
+  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
+  await user.click(screen.getByRole("button", { name: "Reset" }));
 
-describe('user interactions', () => {
+  expect(screen.getByPlaceholderText("Name")).toHaveValue("");
+});
 
-/* userEvent simulates real user actions.
- while Fire event triggers only a single event.
-So, userEvent provides more realistic and reliable tests.*/
-test('updates name when user types', async () => {
-  
+test("calls onAdd with intern data when form is submitted", async () => {
+  const user = userEvent.setup();
+  const onAdd = vi.fn();
 
-  render(<AddInternForm />)
+  render(<AddInternForm onAdd={onAdd} count={0} />);
 
-  await user.type(screen.getByPlaceholderText('Name'), 'Rahul')
+  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
 
-  expect(screen.getByDisplayValue('Rahul')).toBeInTheDocument()
-})
+  await user.clear(screen.getByPlaceholderText("Score"));
+  await user.type(screen.getByPlaceholderText("Score"), "92");
 
-test('updates score when user types', async () => {
-  
+  await user.click(screen.getByRole("button", { name: "Add Intern" }));
 
-  render(<AddInternForm />)
+  expect(onAdd).toHaveBeenCalledTimes(1);
 
-  await user.clear(screen.getByPlaceholderText('Score'))
-  await user.type(screen.getByPlaceholderText('Score'), '92')
-
-  expect(screen.getByDisplayValue('92')).toBeInTheDocument()
-})
-test('resets name input when Reset is clicked', async () => {
- 
-
-  render(<AddInternForm />)
-
-  await user.type(screen.getByPlaceholderText('Name'), 'Rahul')
-  await user.click(screen.getByRole('button', { name: 'Reset' }))
-
-  expect(screen.getByPlaceholderText('Name')).toHaveValue('')
-})
-
-test('calls addIntern with intern data when form is submitted', async () => {
-  
-  render(<AddInternForm />)
-
-  await user.type(screen.getByPlaceholderText('Name'), 'Rahul')
-
-  await user.clear(screen.getByPlaceholderText('Score'))
-  await user.type(screen.getByPlaceholderText('Score'), '92')
-
-  await user.click(screen.getByRole('button', { name: 'Add Intern' }))
-
-  expect(mockAddIntern).toHaveBeenCalledTimes(1)
-
-  expect(mockAddIntern).toHaveBeenCalledWith(
+  expect(onAdd).toHaveBeenCalledWith(
     expect.objectContaining({
-      name: 'Rahul',
+      name: "Rahul",
       score: 92,
-    })
-  )
-})
-/* expect.objectContaining() contains only the specified properties of an object . 
-It ignores the additional properties, making the test more flexible than comparing the entire object exactly.*/
+    }),
+  );
+});
+//task 4.1
+// not.toHaveBeenCalled() is clearer because it directly states
+// that the mock function should never have been called.
+// It is easier to read than checking that it was called zero times.
 
-})
+test("shows error when name is empty on submit", async () => {
+  const user = userEvent.setup();
 
-describe('validation', () => {
+  render(<AddInternForm onAdd={() => {}} count={0} />);
 
-test('shows error when name is empty on submit', async () => {
- 
+  await user.click(screen.getByRole("button", { name: "Add Intern" }));
 
-  render(<AddInternForm />)
+  expect(screen.getByText("Name is required")).toBeInTheDocument();
+});
 
-  await user.click(screen.getByRole('button', { name: 'Add Intern' }))
+test("shows error when score is above 100", async () => {
+  const user = userEvent.setup();
 
-  expect(screen.getByText('Name is required')).toBeInTheDocument()
-})
+  render(<AddInternForm onAdd={() => {}} count={0} />);
 
-test('shows error when score is above 100', async () => {
-  
-  render(<AddInternForm />)
+  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
 
-  await user.type(screen.getByPlaceholderText('Name'), 'Rahul')
+  await user.clear(screen.getByPlaceholderText("Score"));
+  await user.type(screen.getByPlaceholderText("Score"), "150");
 
-  await user.clear(screen.getByPlaceholderText('Score'))
-  await user.type(screen.getByPlaceholderText('Score'), '150')
-
-  await user.click(screen.getByRole('button', { name: 'Add Intern' }))
+  await user.click(screen.getByRole("button", { name: "Add Intern" }));
 
   expect(
-  screen.getByText('Score must be 0–100')
-).toBeInTheDocument()
-})
+    screen.getByText("Score must be between 0 and 100"),
+  ).toBeInTheDocument();
+});
 
-test('does not call addIntern when form is invalid', async () => {
-  
+test("does not call onAdd when form is invalid", async () => {
+  const user = userEvent.setup();
+  const onAdd = vi.fn();
 
+  render(<AddInternForm onAdd={onAdd} count={0} />);
 
+  await user.click(
+    screen.getByRole("button", {
+      name: "Add Intern",
+    }),
+  );
 
-  render(<AddInternForm />)
+  expect(onAdd).not.toHaveBeenCalled();
+});
+//task 4.2
+test("error clears when valid name is entered after failed submit", async () => {
+  const user = userEvent.setup();
 
-  // Submit without filling in anything
-  await user.click(screen.getByRole('button', { name: 'Add Intern' }))
+  render(<AddInternForm onAdd={() => {}} count={0} />);
 
-  expect(mockAddIntern).not.toHaveBeenCalled()
-})
+  // Trigger the validation error
+  await user.click(screen.getByRole("button", { name: "Add Intern" }));
 
-/* not.toHaveBeenCalled() clearly checks that a mock function was never called.
-toHaveBeenCalledTimes(0) gives the same result but not.toHaveBeenCalled() is easier to read . 
-It better expresses the intentions of the test.
- */
+  expect(screen.getByText("Name is required")).toBeInTheDocument();
 
+  // Fix the error by typing a valid name
+  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
 
-test('error clears when valid name is entered after failed submit', async () => {
-  
-
-  render(<AddInternForm />)
-
-  await user.click(screen.getByRole('button', { name: 'Add Intern' }))
-  expect(screen.getByText('Name is required')).toBeInTheDocument()
-
-  await user.type(screen.getByPlaceholderText('Name'), 'Rahul')
-
-  await user.click(screen.getByRole('button', { name: 'Add Intern' }))
-
+  // Wait until the error disappears
   await waitFor(() => {
-    expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
-  })
-})
-})
-
-})
-
-
+    expect(screen.queryByText("Name is required")).not.toBeInTheDocument();
+  });
+});
+// queryBy returns null if the element is not found, making it suitable
+// for checking that an element has disappeared. getBy would throw an
+// error immediately if the element is missing.
+//task 8.1
+// Keep describe blocks to two levels at most.
+// Shallow nesting keeps test names clear, makes failures easier to locate,
+// and improves readability. Deeply nested describe blocks create long,
+// confusing test paths and make the test file harder to maintain.

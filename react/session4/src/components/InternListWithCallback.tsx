@@ -1,37 +1,50 @@
-import {  useCallback } from 'react'
-import { useInterns } from '../contexts/intern-context'
+import { useCallback } from "react";
+import { useInterns } from "../contexts/intern-context";
+import { useTheme } from "../contexts/theme-context";
 
-import InternRow from './InternRow'
-//InternRow was moved to its own component file (InternRow.tsx) 
+interface InternRowProps {
+  id: number;
+  name: string;
+  score: number;
+  onRemove: (id: number) => void;
+}
 
+function InternRow({ id, name, score, onRemove }: InternRowProps) {
+  const { theme } = useTheme();
 
+  console.log(`InternRow rendered: ${name}`);
 
-// const InternRow = memo(function InternRow({
-//   id,
-//   name,
-//   score,
-//   onRemove,
-// }: InternRowProps) {
-//   const { theme } = useTheme()
+  return (
+    <div
+      style={{
+        background: theme === "light" ? "#fff" : "#2a2a2a",
+        color: theme === "light" ? "#000" : "#eee",
+        padding: "8px",
+        margin: "4px 0",
+      }}
+    >
+      <span>
+        {name} — {score}
+      </span>
 
-//   console.log(`InternRow rendered: ${name}`)
-
-
+      <button onClick={() => onRemove(id)}>Remove</button>
+    </div>
+  );
+}
 
 function InternListWithCallback() {
-  const { interns, removeIntern } = useInterns()
+  const { interns, removeIntern } = useInterns();
 
-  const handleRemove = useCallback((id: number): void => {
-    removeIntern(id)
-  }, [removeIntern])
-// const handleRemove = (id: number): void => {
-//   removeIntern(id)
-// }
-
+  const handleRemove = useCallback(
+    (id: number): void => {
+      removeIntern(id);
+    },
+    [removeIntern],
+  );
 
   return (
     <div>
-      {interns.map(i => (
+      {interns.map((i) => (
         <InternRow
           key={i.id}
           id={i.id}
@@ -41,12 +54,12 @@ function InternListWithCallback() {
         />
       ))}
     </div>
-  )
+  );
 }
 
-export default InternListWithCallback
-
-/*
-useCallback keeps the same function reference between the renders.
-It helps to prevent  unnecessary re-renders of child components.
- */
+export default InternListWithCallback;
+// useCallback memoizes the function so that the same function reference
+// is reused between renders unless its dependencies change. This helps
+// prevent unnecessary re-renders of child components that receive the
+// function as a prop, especially when those components are optimized
+// using React.memo.

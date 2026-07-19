@@ -1,35 +1,80 @@
-import useInternForm from '../hooks/useInternForm'
-import { useInterns } from '../contexts/intern-context'
+import { useState } from "react";
 
-function AddInternForm() {
-  const { form, error, handleChange, handleReset, isValid } = useInternForm()
-  const { addIntern, interns } = useInterns()
+interface AddInternFormProps {
+  onAdd: (intern: { name: string; score: number }) => void;
+  count: number;
+}
 
-  function handleSubmit(): void {
-    if (!isValid()) return
-    addIntern({ id: interns.length + 1, ...form })
-    handleReset()
+function AddInternForm({ onAdd, count }: AddInternFormProps) {
+  const [name, setName] = useState("");
+  const [score, setScore] = useState(0);
+  const [error, setError] = useState("");
+
+  function handleSubmit() {
+    if (name.trim() === "") {
+      setError("Name is required");
+      return;
+    }
+
+    if (score < 0 || score > 100) {
+      setError("Score must be between 0 and 100");
+      return;
+    }
+
+    setError("");
+
+    onAdd({
+      name,
+      score,
+    });
+
+    setName("");
+    setScore(0);
+  }
+
+  function handleReset() {
+    setName("");
+    setScore(0);
+    setError("");
+  }
+
+  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setName(e.target.value);
+
+    if (e.target.value.trim() !== "") {
+      setError("");
+    }
+  }
+
+  function handleScoreChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setScore(Number(e.target.value));
   }
 
   return (
     <div>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <p>Total Interns: {count}</p>
 
-      <input name="name"  type="text"     value={form.name}       onChange={handleChange} placeholder="Name"  />
-      <input name="score" type="number"   value={form.score}       onChange={handleChange} placeholder="Score" />
-      <input name="isPresent" type="checkbox" checked={form.isPresent} onChange={handleChange} />
-      <label>Present</label>
+      {error && <p>{error}</p>}
 
-      <select name="role" value={form.role} onChange={handleChange}>
-        <option value="Frontend">Frontend</option>
-        <option value="Backend">Backend</option>
-        <option value="Fullstack">Fullstack</option>
-      </select>
+      <input
+        type="text"
+        placeholder="Name"
+        value={name}
+        onChange={handleNameChange}
+      />
+
+      <input
+        type="number"
+        placeholder="Score"
+        value={score}
+        onChange={handleScoreChange}
+      />
 
       <button onClick={handleSubmit}>Add Intern</button>
+
       <button onClick={handleReset}>Reset</button>
     </div>
-  )
+  );
 }
 
-export default AddInternForm
+export default AddInternForm;

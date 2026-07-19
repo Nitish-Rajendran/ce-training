@@ -1,31 +1,31 @@
-import { useTheme } from '../contexts/theme-context'
-
 interface InternRowProps {
-  id: number
-  name: string
-  score: number
-  onRemove: (id: number) => void
+  id: number;
+  name: string;
+  score: number;
+  onRemove: (id: number) => void;
 }
 
 function InternRow({ id, name, score, onRemove }: InternRowProps) {
-  const { theme } = useTheme()
-
   return (
     <div
       style={{
-        background: theme === 'light' ? '#fff' : '#2a2a2a',
-        color: theme === 'light' ? '#000' : '#eee',
-        padding: '8px',
-        margin: '4px 0',
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        marginBottom: "8px",
       }}
     >
-      <span>{name} — {score}</span>
+      <div>
+        <h3>{name}</h3>
+        <p>Score: {score}</p>
+      </div>
 
-      <button onClick={() => onRemove(id)}>
-        Remove
-      </button>
+      <button onClick={() => onRemove(id)}>Remove</button>
     </div>
-  )
+  );
 }
 
-export default InternRow
+export default InternRow;
