@@ -1,65 +1,42 @@
-import { useCallback } from 'react'
+import {  useCallback } from 'react'
 import { useInterns } from '../contexts/intern-context'
-import { useTheme } from '../contexts/theme-context'
 
-interface InternRowProps {
-  id: number
-  name: string
-  score: number
-  onRemove: (id: number) => void
-}
+import InternRow from './InternRow'
+//InternRow was moved to its own component file (InternRow.tsx) 
 
-function InternRow({ id, name, score, onRemove }: InternRowProps) {
-  const { theme } = useTheme()
 
-  console.log(`InternRow rendered: ${name}`)
 
-  return (
-    <div
-      style={{
-        background: theme === 'light' ? '#fff' : '#2a2a2a',
-        color: theme === 'light' ? '#000' : '#eee',
-        padding: '8px',
-        margin: '4px 0',
-      }}
-    >
-      <span>
-        {name} — {score}
-      </span>
+// const InternRow = memo(function InternRow({
+//   id,
+//   name,
+//   score,
+//   onRemove,
+// }: InternRowProps) {
+//   const { theme } = useTheme()
 
-      <button
-        style={{ marginLeft: '10px' }}
-        onClick={() => onRemove(id)}
-      >
-        Remove
-      </button>
-    </div>
-  )
-}
+//   console.log(`InternRow rendered: ${name}`)
+
+
 
 function InternListWithCallback() {
   const { interns, removeIntern } = useInterns()
 
-  // useCallback keeps the same function reference between renders.
-  // This helps prevent unnecessary re-renders of child components
-  // that receive the function as a prop.
-  const handleRemove = useCallback(
-    (id: number): void => {
-      removeIntern(id)
-    },
-    [removeIntern]
-  )
+  const handleRemove = useCallback((id: number): void => {
+    removeIntern(id)
+  }, [removeIntern])
+// const handleRemove = (id: number): void => {
+//   removeIntern(id)
+// }
+
 
   return (
     <div>
-      <h2>Intern List</h2>
-
-      {interns.map((intern) => (
+      {interns.map(i => (
         <InternRow
-          key={intern.id}
-          id={intern.id}
-          name={intern.name}
-          score={intern.score}
+          key={i.id}
+          id={i.id}
+          name={i.name}
+          score={i.score}
           onRemove={handleRemove}
         />
       ))}
@@ -69,7 +46,7 @@ function InternListWithCallback() {
 
 export default InternListWithCallback
 
-// useCallback memoizes a function so React can reuse the same function
-// reference between renders until its dependencies change. This helps
-// prevent unnecessary re-renders of child components that receive the
-// function as a prop, improving performance in larger applications.
+/*
+useCallback keeps the same function reference between the renders.
+It helps to prevent  unnecessary re-renders of child components.
+ */

@@ -1,24 +1,21 @@
-import { createContext, useContext, useState } from 'react'
-import type { ReactNode } from 'react'
+import { createContext, useContext, useState,type ReactNode } from 'react'
 
 type Theme = 'light' | 'dark'
 
 interface ThemeContextType {
-  theme: Theme
+  theme:       Theme
   toggleTheme: () => void
 }
 
-// The context starts as null because there is no valid theme
-// until a ThemeProvider supplies one.
-// The custom hook throws an error if used outside ThemeProvider,
-// helping catch mistakes instead of silently using a wrong value.
 const ThemeContext = createContext<ThemeContextType | null>(null)
+/* createContext is initialized with null beacuse it's value comes from the theme provider.
+If it is used outside the provider,it gives the error rather than incorrectly using the default value. */
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
 
-  function toggleTheme() {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
+  function toggleTheme(): void {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
   }
 
   return (
@@ -30,10 +27,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext)
-
-  if (!context) {
-    throw new Error('useTheme must be used inside ThemeProvider')
-  }
-
+  if (!context) throw new Error('useTheme must be used inside ThemeProvider')
   return context
 }
+
+/*explore section:using usetheme() outside the component
+
+error: Invalid hook call .Hooks should not be called outside the function component.
+Using them in a normal function violates the rules of hooks.
+*/ 

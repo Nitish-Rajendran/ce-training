@@ -1,50 +1,39 @@
 import { useState } from 'react'
-import type { ChangeEvent } from 'react'
 
 interface InternFormState {
-  name: string
-  score: number
+  name:      string
+  score:     number
   isPresent: boolean
-  role: string
+  role:      string
 }
 
 interface UseInternFormReturn {
-  form: InternFormState
-  error: string
-  handleChange: (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => void
-  handleReset: () => void
-  isValid: () => boolean
+  form:         InternFormState
+  error:        string
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+  handleReset:  () => void
+  isValid:      () => boolean
 }
+/* The return type interface tells what exactly the custom hook returns.
+It improves type safety, makes it easier to understand and maintain. */
 
 const initialForm: InternFormState = {
-  name: '',
-  score: 0,
-  isPresent: true,
-  role: 'Frontend',
+  name: '', score: 0, isPresent: true, role: 'Frontend',
 }
 
-// The return type interface clearly defines what this custom hook
-// provides to components. It improves type safety, autocomplete,
-// and makes the hook easier to understand and maintain.
 function useInternForm(): UseInternFormReturn {
-  const [form, setForm] = useState<InternFormState>(initialForm)
-  const [error, setError] = useState('')
+  const [form,  setForm]  = useState<InternFormState>(initialForm)
+  const [error, setError] = useState<string>('')
 
   function handleChange(
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void {
     const { name, value, type } = e.target
-
     setForm(prev => ({
       ...prev,
-      [name]:
-        type === 'checkbox'
-          ? (e.target as HTMLInputElement).checked
-          : name === 'score'
-            ? Number(value)
-            : value,
+      [name]: type === 'checkbox'
+        ? (e.target as HTMLInputElement).checked
+        : name === 'score' ? Number(value) : value,
     }))
   }
 
@@ -54,27 +43,13 @@ function useInternForm(): UseInternFormReturn {
   }
 
   function isValid(): boolean {
-    if (!form.name.trim()) {
-      setError('Name is required')
-      return false
-    }
-
-    if (form.score < 0 || form.score > 100) {
-      setError('Score must be between 0 and 100')
-      return false
-    }
-
+    if (!form.name.trim()) { setError('Name is required'); return false }
+    if (form.score < 0 || form.score > 100) { setError('Score must be 0–100'); return false }
     setError('')
     return true
   }
 
-  return {
-    form,
-    error,
-    handleChange,
-    handleReset,
-    isValid,
-  }
+  return { form, error, handleChange, handleReset, isValid }
 }
 
 export default useInternForm

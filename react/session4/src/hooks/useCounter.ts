@@ -1,45 +1,75 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 
 interface UseCounterOptions {
   initial?: number
-  min?: number
-  max?: number
-  step?: number
+  min?:     number
+  max?:     number
+  step?:    number
 }
 
 interface UseCounterReturn {
-  count: number
+  count:     number
   increment: () => void
   decrement: () => void
-  reset: () => void
+  reset:     () => void
 }
 
-// A custom hook is a reusable function that uses React hooks.
-// Custom hooks must start with "use" and follow the Rules of Hooks,
-// meaning they can only call hooks at the top level of a React
-// component or another custom hook.
+interface CounterState {
+  count: number
+}
+
+type CounterAction =
+  | { type: 'increment' }
+  | { type: 'decrement' }
+  | { type: 'reset' }
+
 function useCounter({
   initial = 0,
   min = -Infinity,
   max = Infinity,
   step = 1,
 }: UseCounterOptions = {}): UseCounterReturn {
-  const [count, setCount] = useState<number>(initial)
+
+  function reducer(state: CounterState, action: CounterAction): CounterState {
+    switch (action.type) {
+      case 'increment':
+        return {
+          count: Math.min(state.count + step, max),
+        }
+
+      case 'decrement':
+        return {
+          count: Math.max(state.count - step, min),
+        }
+
+      case 'reset':
+        return {
+          count: initial,
+        }
+
+      default:
+        return state
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, {
+    count: initial,
+  })
 
   function increment(): void {
-    setCount(prev => Math.min(prev + step, max))
+    dispatch({ type: 'increment' })
   }
 
   function decrement(): void {
-    setCount(prev => Math.max(prev - step, min))
+    dispatch({ type: 'decrement' })
   }
 
   function reset(): void {
-    setCount(initial)
+    dispatch({ type: 'reset' })
   }
 
   return {
-    count,
+    count: state.count,
     increment,
     decrement,
     reset,
@@ -47,3 +77,8 @@ function useCounter({
 }
 
 export default useCounter
+
+/*
+useCounter is a custom hook beacuse it uses React hooks and starts with the word "use".
+It must be called inside React components or other custom hooks but not in regular functions,loops or conditions.
+*/

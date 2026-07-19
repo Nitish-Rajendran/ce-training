@@ -1,5 +1,5 @@
 interface User {
-  name: string
+  name:    string
   isAdmin: boolean
 }
 
@@ -14,10 +14,6 @@ function UserBadge({ user }: { user: User }) {
 }
 
 // Middle component — receives user only to pass it down, never uses it
-// This component does not use the user object itself.
-// It only forwards the prop to UserBadge.
-// If the User interface changes, this component must also update
-// even though it doesn't directly use the data.
 function InternCard({ user }: { user: User }) {
   return (
     <div style={{ border: '1px solid #ccc', padding: '8px' }}>
@@ -28,10 +24,6 @@ function InternCard({ user }: { user: User }) {
 }
 
 // Parent — passes user down to InternCard
-// This component also does not use the user object.
-// It simply passes it to its children.
-// This is called prop drilling. If the User interface gains a new field,
-// this component must also update even though it never uses that field.
 function InternList({ user }: { user: User }) {
   return (
     <div>
@@ -44,8 +36,13 @@ function InternList({ user }: { user: User }) {
 // Top level — owns the user
 function PropDrillingDemo() {
   const user: User = { name: 'Rahul', isAdmin: true }
-
   return <InternList user={user} />
 }
 
 export default PropDrillingDemo
+/*    
+The InternCard and  InternList doesn't use the user data.
+Instead they pass them to the child components (prop drilling).
+If the user Interface is updated, we need to  pass the updated data. 
+This makes the code harder to maintain.
+*/
