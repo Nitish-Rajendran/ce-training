@@ -1,53 +1,51 @@
-import { useInterns } from '../contexts/intern-context'
-import useInternSearch from '../hooks/useInternSearch'
+import { useInterns } from "../contexts/intern-context";
+import useInternSearch from "../hooks/useInternSearch";
 
 function InternSearch() {
-  const { interns } = useInterns()
+  const { interns } = useInterns();
 
-  const { search, setSearch, filtered, stats } =
-    useInternSearch(interns)
+  const { search, setSearch, filtered, stats } = useInternSearch(interns);
 
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h2>Search Interns</h2>
-
+    <div style={{ marginTop: "20px" }}>
       <input
         type="text"
-        placeholder="Search by name"
+        placeholder="Search interns..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <h3>Statistics</h3>
+      <div style={{ margin: "12px 0" }}>
+        <p>Total Interns: {stats.total}</p>
+        <p>Present: {stats.present}</p>
+        <p>Average Score: {stats.avg}</p>
+      </div>
 
-      <p>Total Interns: {stats.total}</p>
-      <p>Present: {stats.present}</p>
-      <p>Average Score: {stats.avg}</p>
-
-      <h3>Results</h3>
+      <h3>Filtered Interns</h3>
 
       {filtered.map((intern) => (
         <div
           key={intern.id}
           style={{
-            border: '1px solid gray',
-            padding: '8px',
-            marginBottom: '8px',
+            border: "1px solid #ccc",
+            padding: "10px",
+            marginBottom: "8px",
           }}
         >
-          <strong>{intern.name}</strong>
-
-          <p>Role: {intern.role}</p>
-
-          <p>Score: {intern.score}</p>
-
           <p>
-            {intern.isPresent ? 'Present' : 'Absent'}
+            <strong>{intern.name}</strong>
           </p>
+          <p>Role: {intern.role}</p>
+          <p>Score: {intern.score}</p>
+          <p>{intern.isPresent ? "Present" : "Absent"}</p>
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-export default InternSearch
+export default InternSearch;
+// Without useMemo, the statistics would be recalculated on every component
+// render, even if the interns array had not changed. This is wasteful because
+// the calculations are repeated unnecessarily. useMemo caches the result and
+// only recalculates it when the interns dependency changes.

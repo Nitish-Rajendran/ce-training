@@ -1,56 +1,51 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo } from "react";
 
 interface Intern {
-  id: number
-  name: string
-  score: number
-  role: string
-  isPresent: boolean
+  id: number;
+  name: string;
+  score: number;
+  role: string;
+  isPresent: boolean;
 }
 
 interface UseInternSearchReturn {
-  search: string
-  setSearch: (value: string) => void
-  filtered: Intern[]
+  search: string;
+  setSearch: (value: string) => void;
+  filtered: Intern[];
   stats: {
-    total: number
-    present: number
-    avg: number
-  }
+    total: number;
+    present: number;
+    avg: number;
+  };
 }
 
-// Finding:
-// useMemo prevents unnecessary recalculation of the filtered list.
-// Without useMemo, filtering runs on every render.
-// With useMemo, filtering only runs when the interns list or search text changes.
 function useInternSearch(interns: Intern[]): UseInternSearchReturn {
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState<string>("");
 
-  const filtered = useMemo(() => {
-    return interns.filter((intern) =>
-      intern.name.toLowerCase().includes(search.toLowerCase())
-    )
-  }, [interns, search])
+  const filtered = useMemo<Intern[]>(
+    () =>
+      interns.filter((i) =>
+        i.name.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [interns, search],
+  );
 
-  const stats = useMemo(() => {
-    return {
+  const stats = useMemo(
+    () => ({
       total: interns.length,
       present: interns.filter((i) => i.isPresent).length,
       avg:
         interns.length > 0
           ? Math.round(
-              interns.reduce((sum, i) => sum + i.score, 0) / interns.length
+              interns.reduce((sum, intern) => sum + intern.score, 0) /
+                interns.length,
             )
           : 0,
-    }
-  }, [interns])
+    }),
+    [interns],
+  );
 
-  return {
-    search,
-    setSearch,
-    filtered,
-    stats,
-  }
+  return { search, setSearch, filtered, stats };
 }
 
-export default useInternSearch
+export default useInternSearch;

@@ -1,148 +1,116 @@
-/*
-1. React.memo
+// ===========================================================
+// SELF LEARNING TASKS
+// ===========================================================
 
-React.memo is a higher-order component that memoizes a component.
-It prevents unnecessary re-renders by comparing the current props
-with the previous props. If the props have not changed, React
-reuses the previous rendered output.
+// -----------------------------------------------------------
+// 1. React.memo
+// -----------------------------------------------------------
 
-React.memo works well with useCallback because useCallback keeps
-function props stable. Without useCallback, a new function is
-created on every render, causing React.memo to re-render the child.
-*/
+// React.memo is a higher-order component that prevents a component
+// from re-rendering if its props have not changed. It performs a
+// shallow comparison of the previous and new props. If the props are
+// the same, React reuses the previous rendered output.
+//
+// React.memo works well with useCallback because useCallback keeps
+// function props stable across renders. Without useCallback, a new
+// function is created on every render, causing React.memo to detect
+// changed props and re-render the child unnecessarily.
+//
+// Example:
+//
+// const InternRow = React.memo(function InternRow(props) {
+//     ...
+// });
 
-/*
-Example:
+// -----------------------------------------------------------
+// 2. When NOT to use useMemo and useCallback
+// -----------------------------------------------------------
 
-const InternRow = React.memo(function InternRow(props) {
-   ...
-})
+// Example 1:
+// Do not use useMemo for very cheap calculations.
+//
+// Example:
+// const total = a + b;
+//
+// Wrapping this in useMemo adds unnecessary memory usage and dependency
+// tracking, making the code more complex than simply recalculating it.
 
-*/
+// Example 2:
+// Do not use useCallback for event handlers that are not passed to
+// memoized child components.
+//
+// Example:
+//
+// const handleClick = useCallback(() => {
+//     console.log("Clicked");
+// }, []);
+//
+// If the callback is only used inside the current component,
+// useCallback provides little or no performance benefit while making
+// the code harder to read.
 
-/*
-2. When NOT to use useMemo and useCallback
+// -----------------------------------------------------------
+// 3. useReducer Version of useCounter
+// -----------------------------------------------------------
 
-Example 1:
-If a calculation is very small, like adding two numbers or checking
-a simple condition, using useMemo adds unnecessary complexity and
-can actually be slower than recalculating.
-
-Example 2:
-If a callback is not passed to memoized child components, wrapping
-it with useCallback provides no benefit and only makes the code
-harder to read.
-*/
-
-/*
-3. useReducer
-
-useReducer is useful when state updates are complex or when multiple
-pieces of state depend on each other.
-
-It is preferable over multiple useState calls when:
-- there are many related state values
-- state transitions are complex
-- update logic should be centralized
-*/
-
-import { useReducer } from 'react'
+import { useReducer } from "react";
 
 interface CounterState {
-  count: number
+  count: number;
 }
 
-type Action =
-  | { type: 'increment'; step: number; max: number }
-  | { type: 'decrement'; step: number; min: number }
-  | { type: 'reset'; initial: number }
+type CounterAction =
+  | { type: "increment" }
+  | { type: "decrement" }
+  | { type: "reset" };
 
-function reducer(state: CounterState, action: Action): CounterState {
+function reducer(state: CounterState, action: CounterAction): CounterState {
   switch (action.type) {
-    case 'increment':
-      return {
-        count: Math.min(state.count + action.step, action.max),
-      }
+    case "increment":
+      return { count: state.count + 1 };
 
-    case 'decrement':
-      return {
-        count: Math.max(state.count - action.step, action.min),
-      }
+    case "decrement":
+      return { count: state.count - 1 };
 
-    case 'reset':
-      return {
-        count: action.initial,
-      }
+    case "reset":
+      return { count: 0 };
 
     default:
-      return state
+      return state;
   }
 }
 
-function CounterExample() {
-  const initial = 0
-  const min = -Infinity
-  const max = Infinity
-  const step = 1
+function useCounterReducer() {
+  const [state, dispatch] = useReducer(reducer, { count: 0 });
 
-  const [state, dispatch] = useReducer(reducer, {
-    count: initial,
-  })
-
-  return (
-    <div>
-      <p>{state.count}</p>
-
-      <button
-        onClick={() =>
-          dispatch({
-            type: 'increment',
-            step,
-            max,
-          })
-        }
-      >
-        +
-      </button>
-
-      <button
-        onClick={() =>
-          dispatch({
-            type: 'decrement',
-            step,
-            min,
-          })
-        }
-      >
-        -
-      </button>
-
-      <button
-        onClick={() =>
-          dispatch({
-            type: 'reset',
-            initial,
-          })
-        }
-      >
-        Reset
-      </button>
-    </div>
-  )
+  return {
+    count: state.count,
+    increment: () => dispatch({ type: "increment" }),
+    decrement: () => dispatch({ type: "decrement" }),
+    reset: () => dispatch({ type: "reset" }),
+  };
 }
 
-/*
-4. Zustand vs Redux Toolkit vs Context API
+// useReducer is preferable when state transitions are complex,
+// involve multiple related values, or when many actions update
+// the same state. It centralizes update logic inside a reducer,
+// making the code easier to maintain than using multiple useState
+// hooks.
 
-Context with useState is suitable for small to medium applications
-where only a few pieces of global state need to be shared.
+// -----------------------------------------------------------
+// 4. Zustand / Redux Toolkit vs Context API
+// -----------------------------------------------------------
 
-Zustand is lightweight and easy to use for medium to large
-applications with more complex shared state.
+// Context API with useState is suitable for small to medium-sized
+// applications where only a few pieces of global state need to be
+// shared, such as themes, authentication, or user preferences.
+//
+// Zustand and Redux Toolkit are better choices for large applications
+// with complex shared state, many independent updates, asynchronous
+// operations, or advanced debugging requirements. They provide better
+// scalability, predictable state updates, middleware support, and
+// developer tools. Context is simpler and built into React, while
+// Zustand and Redux Toolkit offer more powerful state management for
+// enterprise-scale applications.
 
-Redux Toolkit is best for very large applications where predictable
-state management, middleware, debugging tools, and scalable
-architecture are important.
-*/
-
-export default CounterExample
+export {};
