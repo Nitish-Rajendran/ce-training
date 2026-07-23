@@ -1,38 +1,33 @@
-import { useTheme } from '../contexts/theme-context'
+import { useTheme } from "../contexts/theme-context";
 
 interface ThemedCardProps {
-  name: string
-  score: number
+  name: string;
+  score: number;
 }
 
 function ThemedCard({ name, score }: ThemedCardProps) {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
 
   return (
     <div
       style={{
-        background: theme === 'light' ? '#ffffff' : '#2a2a2a',
-        color: theme === 'light' ? '#000000' : '#eeeeee',
-        border: `1px solid ${theme === 'light' ? '#dddddd' : '#444444'}`,
-        borderRadius: '6px',
-        padding: '12px',
-        margin: '10px 0',
+        background: theme === "light" ? "#ffffff" : "#2a2a2a",
+        color: theme === "light" ? "#000" : "#eee",
+        border: `1px solid ${theme === "light" ? "#ddd" : "#444"}`,
+        padding: "12px",
+        margin: "8px 0",
+        borderRadius: "4px",
       }}
     >
       <h3>{name}</h3>
 
       <p>Score: {score}</p>
 
-      <p
-        style={{
-          color: score >= 50 ? 'green' : 'red',
-          fontWeight: 'bold',
-        }}
-      >
-        {score >= 50 ? 'Pass' : 'Fail'}
+      <p style={{ color: score >= 50 ? "green" : "red" }}>
+        {score >= 50 ? "Pass" : "Fail"}
       </p>
     </div>
-  )
+  );
 }
 
-export default ThemedCard
+export default ThemedCard;
