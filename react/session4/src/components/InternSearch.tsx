@@ -1,51 +1,66 @@
-import { useInterns } from "../contexts/intern-context";
-import useInternSearch from "../hooks/useInternSearch";
+import { useInterns } from '../contexts/intern-context'
+import useInternSearch from '../hooks/useInternSearch'
 
 function InternSearch() {
-  const { interns } = useInterns();
+  const { interns, isLoading } = useInterns()
 
-  const { search, setSearch, filtered, stats } = useInternSearch(interns);
+  const {
+    search,
+    setSearch,
+    filtered,
+    stats,
+  } = useInternSearch(interns)
+
+  if (isLoading) {
+    return <p>Loading interns...</p>
+  }
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div
+      style={{
+        border: '1px solid #ccc',
+        padding: '16px',
+        marginBottom: '20px',
+        borderRadius: '6px',
+      }}
+    >
+      <h2>Search Interns</h2>
+
       <input
         type="text"
-        placeholder="Search interns..."
+        placeholder="Search by name..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={e => setSearch(e.target.value)}
+        style={{
+          padding: '8px',
+          width: '250px',
+          marginBottom: '16px',
+        }}
       />
 
-      <div style={{ margin: "12px 0" }}>
-        <p>Total Interns: {stats.total}</p>
-        <p>Present: {stats.present}</p>
-        <p>Average Score: {stats.avg}</p>
+      <div style={{ marginBottom: '16px' }}>
+        <p><strong>Total Interns:</strong> {stats.total}</p>
+        <p><strong>Present:</strong> {stats.present}</p>
+        <p><strong>Average Score:</strong> {stats.avg}</p>
       </div>
 
       <h3>Filtered Interns</h3>
 
-      {filtered.map((intern) => (
-        <div
-          key={intern.id}
-          style={{
-            border: "1px solid #ccc",
-            padding: "10px",
-            marginBottom: "8px",
-          }}
-        >
-          <p>
-            <strong>{intern.name}</strong>
-          </p>
-          <p>Role: {intern.role}</p>
-          <p>Score: {intern.score}</p>
-          <p>{intern.isPresent ? "Present" : "Absent"}</p>
-        </div>
-      ))}
+      {filtered.length === 0 ? (
+        <p>No interns found.</p>
+      ) : (
+        <ul>
+          {filtered.map(intern => (
+            <li key={intern.id}>
+              <strong>{intern.name}</strong> | {intern.role} | Score:{' '}
+              {intern.score} |{' '}
+              {intern.isPresent ? 'Present' : 'Absent'}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
-  );
+  )
 }
 
-export default InternSearch;
-// Without useMemo, the statistics would be recalculated on every component
-// render, even if the interns array had not changed. This is wasteful because
-// the calculations are repeated unnecessarily. useMemo caches the result and
-// only recalculates it when the interns dependency changes.
+export default InternSearch

@@ -1,31 +1,28 @@
 interface InternRowProps {
-  id: number;
-  name: string;
-  score: number;
-  onRemove: (id: number) => void;
+  id: number
+  name: string
+  score: number
+  onRemove: (id: number) => void
 }
 
-function InternRow({ id, name, score, onRemove }: InternRowProps) {
+function InternRow({
+  id,
+  name,
+  score,
+  onRemove,
+}: InternRowProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "10px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        marginBottom: "8px",
-      }}
-    >
-      <div>
-        <h3>{name}</h3>
-        <p>Score: {score}</p>
-      </div>
+    <tr>
+      <td>{name}</td>
+      <td>{score}</td>
 
-      <button onClick={() => onRemove(id)}>Remove</button>
-    </div>
-  );
+      <td>
+        <button onClick={() => onRemove(id)}>
+          Remove
+        </button>
+      </td>
+    </tr>
+  )
 }
 
-export default InternRow;
+export default InternRow

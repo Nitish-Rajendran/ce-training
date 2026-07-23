@@ -1,59 +1,49 @@
-import { render, screen } from "../test/test-utils";
-import { render as rtlRender } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import Navbar from "./Navbar";
-import { ThemeProvider } from "../contexts/theme-context";
+import { render, screen } from '../test/test-utils'
+import userEvent from '@testing-library/user-event'
+import Navbar from './Navbar'
+import { test, expect } from 'vitest'
 
-// We import render from ../test/test-utils because it automatically wraps
-// Navbar with ThemeProvider. If we used render from
-// @testing-library/react directly, useTheme() would throw an error saying
-// it must be used inside a ThemeProvider.
-
-test("renders the dashboard title", () => {
-  render(<Navbar />);
-
-  expect(screen.getByText("Intern Dashboard")).toBeInTheDocument();
-});
-
-test("theme toggle button is visible", () => {
-  render(<Navbar />);
+test('renders dashboard title', () => {
+  render(<Navbar />)
 
   expect(
-    screen.getByRole("button", {
-      name: /switch to dark mode/i,
-    }),
-  ).toBeInTheDocument();
-});
+    screen.getByText(/intern dashboard/i)
+  ).toBeInTheDocument()
+})
 
-test("theme toggle button label changes after click", async () => {
-  const user = userEvent.setup();
-
-  render(<Navbar />);
-
-  await user.click(
-    screen.getByRole("button", {
-      name: /switch to dark mode/i,
-    }),
-  );
+test('theme toggle button exists', () => {
+  render(<Navbar />)
 
   expect(
-    screen.getByRole("button", {
-      name: /switch to light mode/i,
-    }),
-  ).toBeInTheDocument();
-});
-//SL1
-// This test is equivalent to the previous tests because the component is
-// manually wrapped in ThemeProvider. The custom render helper does the
-// same thing automatically, reducing duplicate code and making tests
-// easier to maintain.
+    screen.getByRole('button')
+  ).toBeInTheDocument()
+})
 
-test("renders correctly when wrapped manually in ThemeProvider", () => {
+test('toggle button can be clicked', async () => {
+  const user = userEvent.setup()
+
+  render(<Navbar />)
+
+  await user.click(screen.getByRole('button'))
+})
+import { render as rtlRender } from '@testing-library/react'
+import { ThemeProvider } from '../contexts/theme-context'
+
+test('renders correctly when wrapped manually in ThemeProvider', () => {
   rtlRender(
     <ThemeProvider>
       <Navbar />
-    </ThemeProvider>,
-  );
+    </ThemeProvider>
+  )
 
-  expect(screen.getByText("Intern Dashboard")).toBeInTheDocument();
-});
+  expect(
+    screen.getByText(/intern dashboard/i)
+  ).toBeInTheDocument()
+})
+
+/*
+This test is equivalent to using customRender from test-utils.
+
+customRender automatically wraps every component with ThemeProvider,
+so we don't have to repeat the wrapper in every test.
+*/

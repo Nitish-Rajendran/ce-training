@@ -1,22 +1,25 @@
-import { ReactNode } from "react";
-import { render, RenderOptions } from "@testing-library/react";
-import { ThemeProvider } from "../contexts/theme-context";
-import { InternProvider } from "../contexts/intern-context";
+import { render } from '@testing-library/react'
+import type { ReactElement } from 'react'
 
-function AllProviders({ children }: { children: ReactNode }) {
+import { ThemeProvider } from '../contexts/theme-context'
+import { InternProvider } from '../contexts/intern-context'
+
+function AllProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <InternProvider>{children}</InternProvider>
+      <InternProvider>
+        {children}
+      </InternProvider>
     </ThemeProvider>
-  );
+  )
 }
 
-function customRender(ui: React.ReactElement, options?: RenderOptions) {
-  return render(ui, {
+const customRender = (ui: ReactElement, options = {}) =>
+  render(ui, {
     wrapper: AllProviders,
     ...options,
-  });
-}
+  })
 
-export * from "@testing-library/react";
-export { customRender as render };
+export * from '@testing-library/react'
+
+export { customRender as render }

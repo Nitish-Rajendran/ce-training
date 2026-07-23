@@ -1,140 +1,170 @@
-import { render, screen, waitFor } from "../test/test-utils";
-import userEvent from "@testing-library/user-event";
-import AddInternForm from "./AddInternForm";
+import { render, screen, waitFor } from '../test/test-utils'
+import userEvent from '@testing-library/user-event'
+import { describe, test, expect } from 'vitest'
+import AddInternForm from './AddInternForm'
 
-// userEvent is preferred over fireEvent because it simulates
-// real user interactions such as typing, clicking, focusing,
-// and keyboard events. This makes tests closer to actual user behavior.
+// Keep describe blocks at two levels maximum.
+// Too much nesting makes test output difficult to read.
 
-test("updates name when user types", async () => {
-  const user = userEvent.setup();
+describe('AddInternForm', () => {
+  describe('initial state', () => {
+    test('name input is empty', () => {
+      render(<AddInternForm />)
 
-  render(<AddInternForm onAdd={() => {}} count={0} />);
+      expect(
+        screen.getByPlaceholderText('Intern Name')
+      ).toHaveValue('')
+    })
 
-  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
+    test('score input starts at 0', () => {
+      render(<AddInternForm />)
 
-  expect(screen.getByDisplayValue("Rahul")).toBeInTheDocument();
-});
+      expect(
+        screen.getByPlaceholderText('Score')
+      ).toHaveValue(0)
+    })
 
-test("updates score when user types", async () => {
-  const user = userEvent.setup();
+    test('role defaults to Frontend', () => {
+      render(<AddInternForm />)
 
-  render(<AddInternForm onAdd={() => {}} count={0} />);
+      expect(
+        screen.getByRole('combobox')
+      ).toHaveValue('Frontend')
+    })
+  })
 
-  const scoreInput = screen.getByPlaceholderText("Score");
+  describe('validation', () => {
+    test('shows error when name is empty', async () => {
+      const user = userEvent.setup()
 
-  await user.clear(scoreInput);
-  await user.type(scoreInput, "92");
+      render(<AddInternForm />)
 
-  expect(screen.getByDisplayValue("92")).toBeInTheDocument();
-});
-// expect.objectContaining() checks only the specified properties
-// of an object. It ignores any additional properties, making the
-// test more flexible than comparing the entire object.
+      await user.click(
+        screen.getByRole('button', {
+          name: /add intern/i,
+        })
+      )
 
-test("resets name input when Reset is clicked", async () => {
-  const user = userEvent.setup();
+      expect(
+        screen.getByText('Name is required')
+      ).toBeInTheDocument()
+    })
 
-  render(<AddInternForm onAdd={() => {}} count={0} />);
+    test('shows error when score is above 100', async () => {
+      const user = userEvent.setup()
 
-  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
-  await user.click(screen.getByRole("button", { name: "Reset" }));
+      render(<AddInternForm />)
 
-  expect(screen.getByPlaceholderText("Name")).toHaveValue("");
-});
+      await user.type(
+        screen.getByPlaceholderText('Intern Name'),
+        'Rahul'
+      )
 
-test("calls onAdd with intern data when form is submitted", async () => {
-  const user = userEvent.setup();
-  const onAdd = vi.fn();
+      await user.clear(
+        screen.getByPlaceholderText('Score')
+      )
 
-  render(<AddInternForm onAdd={onAdd} count={0} />);
+      await user.type(
+        screen.getByPlaceholderText('Score'),
+        '150'
+      )
 
-  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
+      await user.click(
+        screen.getByRole('button', {
+          name: /add intern/i,
+        })
+      )
 
-  await user.clear(screen.getByPlaceholderText("Score"));
-  await user.type(screen.getByPlaceholderText("Score"), "92");
+      expect(
+        screen.getByText('Score must be between 0 and 100')
+      ).toBeInTheDocument()
+    })
 
-  await user.click(screen.getByRole("button", { name: "Add Intern" }));
+    test('clears error after entering valid data', async () => {
+      const user = userEvent.setup()
 
-  expect(onAdd).toHaveBeenCalledTimes(1);
+      render(<AddInternForm />)
 
-  expect(onAdd).toHaveBeenCalledWith(
-    expect.objectContaining({
-      name: "Rahul",
-      score: 92,
-    }),
-  );
-});
-//task 4.1
-// not.toHaveBeenCalled() is clearer because it directly states
-// that the mock function should never have been called.
-// It is easier to read than checking that it was called zero times.
+      // Trigger validation
+      await user.click(
+        screen.getByRole('button', {
+          name: /add intern/i,
+        })
+      )
 
-test("shows error when name is empty on submit", async () => {
-  const user = userEvent.setup();
+      expect(
+        screen.getByText('Name is required')
+      ).toBeInTheDocument()
 
-  render(<AddInternForm onAdd={() => {}} count={0} />);
+      // Enter valid values
+      await user.type(
+        screen.getByPlaceholderText('Intern Name'),
+        'Rahul'
+      )
 
-  await user.click(screen.getByRole("button", { name: "Add Intern" }));
+      await user.clear(
+        screen.getByPlaceholderText('Score')
+      )
 
-  expect(screen.getByText("Name is required")).toBeInTheDocument();
-});
+      await user.type(
+        screen.getByPlaceholderText('Score'),
+        '95'
+      )
 
-test("shows error when score is above 100", async () => {
-  const user = userEvent.setup();
+      // Submit again
+      await user.click(
+        screen.getByRole('button', {
+          name: /add intern/i,
+        })
+      )
 
-  render(<AddInternForm onAdd={() => {}} count={0} />);
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Name is required')
+        ).not.toBeInTheDocument()
+      })
+    })
+  })
 
-  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
+  describe('successful submit', () => {
+    test('form clears after submit', async () => {
+      const user = userEvent.setup()
 
-  await user.clear(screen.getByPlaceholderText("Score"));
-  await user.type(screen.getByPlaceholderText("Score"), "150");
+      render(<AddInternForm />)
 
-  await user.click(screen.getByRole("button", { name: "Add Intern" }));
+      await user.type(
+        screen.getByPlaceholderText('Intern Name'),
+        'Rahul'
+      )
 
-  expect(
-    screen.getByText("Score must be between 0 and 100"),
-  ).toBeInTheDocument();
-});
+      await user.clear(
+        screen.getByPlaceholderText('Score')
+      )
 
-test("does not call onAdd when form is invalid", async () => {
-  const user = userEvent.setup();
-  const onAdd = vi.fn();
+      await user.type(
+        screen.getByPlaceholderText('Score'),
+        '90'
+      )
 
-  render(<AddInternForm onAdd={onAdd} count={0} />);
+      await user.click(
+        screen.getByRole('button', {
+          name: /add intern/i,
+        })
+      )
 
-  await user.click(
-    screen.getByRole("button", {
-      name: "Add Intern",
-    }),
-  );
+      await waitFor(() => {
+        expect(
+          screen.getByPlaceholderText('Intern Name')
+        ).toHaveValue('')
 
-  expect(onAdd).not.toHaveBeenCalled();
-});
-//task 4.2
-test("error clears when valid name is entered after failed submit", async () => {
-  const user = userEvent.setup();
+        expect(
+          screen.getByPlaceholderText('Score')
+        ).toHaveValue(0)
 
-  render(<AddInternForm onAdd={() => {}} count={0} />);
-
-  // Trigger the validation error
-  await user.click(screen.getByRole("button", { name: "Add Intern" }));
-
-  expect(screen.getByText("Name is required")).toBeInTheDocument();
-
-  // Fix the error by typing a valid name
-  await user.type(screen.getByPlaceholderText("Name"), "Rahul");
-
-  // Wait until the error disappears
-  await waitFor(() => {
-    expect(screen.queryByText("Name is required")).not.toBeInTheDocument();
-  });
-});
-// queryBy returns null if the element is not found, making it suitable
-// for checking that an element has disappeared. getBy would throw an
-// error immediately if the element is missing.
-//task 8.1
-// Keep describe blocks to two levels at most.
-// Shallow nesting keeps test names clear, makes failures easier to locate,
-// and improves readability. Deeply nested describe blocks create long,
-// confusing test paths and make the test file harder to maintain.
+        expect(
+          screen.getByRole('combobox')
+        ).toHaveValue('Frontend')
+      })
+    })
+  })
+})
